@@ -14,7 +14,7 @@ import lombok.Setter;
 @AllArgsConstructor
 public class UserRequest {
     @NotBlank
-    private String username;
+    private String name;
     @NotBlank
     private String password;
     @Email
@@ -23,6 +23,6 @@ public class UserRequest {
     private String phone;
 
     public User toUser(){
-        return Userbuilder().userName(username).password(password).email(email).phone(phone).build();
+        return User.builder().name(name).password(password).email(email).phone(phone).build();
     }
 }

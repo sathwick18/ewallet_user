@@ -16,6 +16,7 @@ public class KafkaConfigurations {
     // User service is a producer service
     // 1. ZooKeeper running
     // 2. Kafka Server / bootstrap running
+    // /opt/homebrew/opt/kafka/bin/kafka-server-start /opt/homebrew/etc/kafka/server.properties
     // 3. Created a topic for user
     // Note: above 3 steps are outside the scope of this application.
     // This application needs
