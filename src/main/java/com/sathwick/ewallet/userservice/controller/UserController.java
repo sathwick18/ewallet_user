@@ -1,6 +1,7 @@
 package com.sathwick.ewallet.userservice.controller;
 
 import com.sathwick.ewallet.userservice.service.UserService;
+import com.sathwick.ewallet.userservice.service.resource.TransactionRequest;
 import com.sathwick.ewallet.userservice.service.resource.UserRequest;
 import com.sathwick.ewallet.userservice.service.resource.UserResponse;
 import jakarta.validation.Valid;
@@ -38,6 +39,17 @@ public class UserController {
     public ResponseEntity<UserResponse> updateUser(@RequestBody @Valid UserRequest userRequest, @PathVariable("id") String userId){
         UserResponse response = userService.updateUser(userRequest, userId);
         return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @PostMapping("/users/{id}/transfer")
+    public ResponseEntity<String> performTransaction(@PathVariable("id") String userId, @RequestBody @Valid TransactionRequest transactionRequest){
+        boolean success = userService.transfer(Long.valueOf(userId), transactionRequest);
+        if(success){
+            return new ResponseEntity<>("Transaction Succesful", HttpStatus.OK);
+        }
+        else {
+            return new ResponseEntity<>("Transaction Failure", HttpStatus.BAD_REQUEST);
+        }
     }
 
 }

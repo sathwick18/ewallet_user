@@ -4,13 +4,17 @@ import com.sathwick.ewallet.userservice.domain.User;
 import com.sathwick.ewallet.userservice.exception.UserException;
 import com.sathwick.ewallet.userservice.repository.UserRepository;
 import com.sathwick.ewallet.userservice.service.UserService;
+import com.sathwick.ewallet.userservice.service.resource.TransactionRequest;
 import com.sathwick.ewallet.userservice.service.resource.UserRequest;
 import com.sathwick.ewallet.userservice.service.resource.UserResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.Optional;
 
@@ -23,6 +27,9 @@ public class UserServiceImpl implements UserService {
 
     @Value("${kafka.topic.user-deleted}")
     private String USER_DELETED_TOPIC;
+
+    @Autowired
+    private RestTemplate restTemplate;
 
     private final UserRepository userRepository;
 
@@ -102,6 +109,30 @@ public class UserServiceImpl implements UserService {
 
         // Return the updated user response
         return new UserResponse(updatedUser);
+    }
+
+    @Override
+    public boolean transfer(Long senderId, TransactionRequest request) {
+        try {
+            log.info("Initiaing transfer from user "+senderId+" with request "+request.toString());
+            Optional<User> senderOptional = userRepository.findById(senderId);
+            if (senderOptional.isEmpty()) {
+                throw new UserException("EWALLET_USER_NOT_FOUND_EXCEPTION", "Sender with id +" + senderId + "+ Not Found");
+            }
+            Optional<User> receiverOptional = userRepository.findById(request.getReceiverId());
+            if (receiverOptional.isEmpty()) {
+                throw new UserException("EWALLET_USER_NOT_FOUND_EXCEPTION", "Receiver with id +" + request.getReceiverId() + "+ Not Found");
+            }
+            // balance validation will be done at wallet service
+            // now perform a rest call to Transaction Service and call should be according to controller of transaction service.
+            ResponseEntity<Boolean> response = restTemplate.postForEntity("http://localhost:8083/transactions/" + senderId, request, Boolean.class);
+            log.info("Transfer response "+response.getBody());
+            return response.getBody();
+        }
+        catch (Exception e){
+            log.error("Internal Server Error: Exception in transfer "+e.getMessage());
+            return false;
+        }
     }
 
 }
