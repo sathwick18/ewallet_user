@@ -125,7 +125,7 @@ public class UserServiceImpl implements UserService {
             }
             // balance validation will be done at wallet service
             // now perform a rest call to Transaction Service and call should be according to controller of transaction service.
-            ResponseEntity<Boolean> response = restTemplate.postForEntity("http://localhost:8083/transactions/" + senderId, request, Boolean.class);
+            ResponseEntity<Boolean> response = restTemplate.postForEntity("http://transaction/transactions/" + senderId, request, Boolean.class);
             log.info("Transfer response "+response.getBody());
             return response.getBody();
         }
